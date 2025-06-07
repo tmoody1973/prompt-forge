@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptForge - AI Prompt Engineering IDE</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span>PromptForge</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>API Connected</span>
+            </div>
+            <span>v1.0.0</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-header">Operations</div>
+                <div class="operation-item active" onclick="selectOperation('review')">
+                    <div class="operation-icon">🔍</div>
+                    <div>
+                        <div class="operation-title">Get Review</div>
+                        <div class="operation-desc">Expert prompt analysis</div>
+                    </div>
+                </div>
+                <div class="operation-item" onclick="selectOperation('test')">
+                    <div class="operation-icon">🧪</div>
+                    <div>
+                        <div class="operation-title">Test Prompt</div>
+                        <div class="operation-desc">Execute with variables & parameters</div>
+                    </div>
+                </div>
+                <div class="operation-item" onclick="selectOperation('library')">
+                    <div class="operation-icon">📚</div>
+                    <div>
+                        <div class="operation-title">Prompt Library</div>
+                        <div class="operation-desc">Save & manage prompts</div>
+                    </div>
+                </div>
+                <div class="operation-item" onclick="selectOperation('evals')">
+                    <div class="operation-icon">📊</div>
+                    <div>
+                        <div class="operation-title">Generate Evals</div>
+                        <div class="operation-desc">Create systematic evaluations</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div id="review-controls" class="operation-controls">
+                    <button class="action-btn" onclick="reviewPrompt()">
+                        <span id="review-btn-text">Dual Analysis</span>
+                    </button>
+                </div>
+
+                <div id="test-controls" class="operation-controls" style="display: none;">
+                    <div id="variables-container">
+                        <div class="variables-header">
+                            Variables Found:
+                            <button class="editor-btn" onclick="updateVariablesList()" style="float: right; font-size: 10px; padding: 2px 6px; margin-left: 8px;">Refresh</button>
+                            <div style="clear: both;"></div>
+                        </div>
+                        <div id="variables-list"></div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Model</label>
+                        <select class="control-input" id="test-model-select" onchange="updateModelContextInfo()">
+                            <option value="gpt-4.1">GPT-4.1 (200K context)</option>
+                            <option value="o3">O3 (1M context)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Temperature</label>
+                        <div class="range-container">
+                            <input 
+                                type="range" 
+                                class="control-input range-input"
+                                id="test-temperature" 
+                                min="0" 
+                                max="2" 
+                                step="0.1" 
+                                value="0.7"
+                                oninput="document.getElementById('test-temp-value').textContent = this.value"
+                            >
+                            <span class="range-value" id="test-temp-value">0.7</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Max Tokens</label>
+                        <input 
+                            type="number" 
+                            class="control-input"
+                            id="test-max-tokens" 
+                            min="1" 
+                            max="4000" 
+                            value="1000"
+                        >
+                    </div>
+                    
+                    <button class="action-btn" onclick="executeTest()">
+                        <span id="test-btn-text">Execute Test</span>
+                    </button>
+                </div>
+
+                <div id="library-controls" class="operation-controls" style="display: none;">
+                    <div class="library-actions">
+                        <button class="action-btn" onclick="saveCurrentPrompt()">
+                            <span id="save-btn-text">💾 Save Current Prompt</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="evals-controls" class="operation-controls" style="display: none;">
+                    <div class="eval-section">
+                        <div class="control-group">
+                            <label class="control-label">Evaluation Type</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="eval-robustness" checked>
+                                    <span>Robustness Testing</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="eval-creativity">
+                                    <span>Creativity Assessment</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="eval-safety">
+                                    <span>Safety & Alignment</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="eval-accuracy">
+                                    <span>Factual Accuracy</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Sample Size</label>
+                            <div class="range-container">
+                                <input 
+                                    type="range" 
+                                    class="control-input range-input"
+                                    id="eval-sample-size" 
+                                    min="5" 
+                                    max="50" 
+                                    step="5" 
+                                    value="10"
+                                    oninput="document.getElementById('eval-sample-value').textContent = this.value"
+                                >
+                                <span class="range-value" id="eval-sample-value">10</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Evaluation Model</label>
+                            <select class="control-input" id="eval-model-select">
+                                <option value="gpt-4.1">GPT-4.1 (More Detailed)</option>
+                                <option value="o3">O3 (Faster)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Difficulty Level</label>
+                            <select class="control-input" id="eval-difficulty">
+                                <option value="mixed">Mixed Difficulty</option>
+                                <option value="easy">Easy Cases</option>
+                                <option value="medium">Medium Cases</option>
+                                <option value="hard">Hard Cases</option>
+                                <option value="adversarial">Adversarial Cases</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="action-btn" onclick="generateEvals()">
+                        <span id="eval-btn-text">🚀 Generate Evaluation Suite</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Sidebar resize handle will be added by JavaScript -->
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="editor-title">
+                    <span>📝</span>
+                    <span>prompt.txt</span>
+                </div>
+                <div class="token-info">
+                    <div class="token-counter" id="token-counter">
+                        <span class="token-main">0 tokens</span>
+                        <span class="token-details">•</span>
+                        <span class="token-context" id="token-context">GPT-4.1: 200K</span>
+                    </div>
+                    <div class="token-warnings" id="token-warnings"></div>
+                </div>
+                <div class="editor-actions">
+                    <button class="editor-btn" onclick="copyPrompt()">Copy</button>
+                    <button class="editor-btn" onclick="clearPrompt()">Clear</button>
+                </div>
+            </div>
+
+            <div class="prompt-editor">
+                <div class="line-numbers" id="line-numbers">1</div>
+                <textarea 
+                    id="main-prompt" 
+                    placeholder="Enter your prompt here..."
+                    oninput="updateLineNumbers()"
+                ></textarea>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <!-- Results resize handle will be added by JavaScript -->
+                <div class="results-header">
+                    <button class="result-tab active" onclick="switchTab('review')">Review</button>
+                    <button class="result-tab" onclick="switchTab('execution')">Execution</button>
+                    <button class="result-tab" onclick="switchTab('history')">History</button>
+                    <button class="result-tab" onclick="switchTab('library')">Library</button>
+                    <button class="result-tab" onclick="switchTab('evaluations')">Evaluations</button>
+                </div>
+                <div id="result-content" class="results-content">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <div>Select an operation to begin analyzing your prompt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Prompt Generator -->
+        <div class="prompt-generator-panel" id="prompt-generator-panel">
+            <div class="prompt-generator-header">
+                <div class="prompt-generator-title">
+                    <button class="collapse-btn" onclick="togglePromptGenerator()" id="collapse-btn" title="Collapse/Expand">
+                        <span id="collapse-icon">▼</span>
+                    </button>
+                    <span>Prompt Generator</span>
+                </div>
+                <div class="prompt-generator-actions">
+                    <button class="generator-btn" onclick="startNewConversation()">New</button>
+                    <button class="generator-btn" onclick="window.toggleConversationHistory()">History</button>
+                    <button class="generator-btn" onclick="clearConversation()">Clear</button>
+                </div>
+            </div>
+            
+            <!-- Conversation History Panel -->
+            <div class="conversation-history-panel" id="conversation-history-panel" style="display: none;">
+                <div class="history-header">
+                    <h4>Conversation History</h4>
+                    <button class="close-btn" onclick="hideConversationHistory()">×</button>
+                </div>
+                <div class="history-list" id="history-list">
+                    <div class="loading">Loading conversations...</div>
+                </div>
+            </div>
+            
+            <div class="conversation-area" id="conversation-area">
+                <div class="conversation-welcome">
+                    <button class="action-btn" onclick="startNewConversation()">Generate a new prompt</button>
+                </div>
+            </div>
+            
+            <div class="conversation-input-area" id="conversation-input-area" style="display: none;">
+                <div class="input-container">
+                    <textarea 
+                        id="conversation-input" 
+                        placeholder="Describe your prompt requirements..."
+                        rows="3"
+                    ></textarea>
+                    <button class="send-btn" onclick="sendMessage()" id="send-btn">
+                        <span>Send</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="tokenizer.js"></script>
+    <script src="app.js"></script>
+    <script src="api-operations.js"></script>
+    <script src="prompt-generator.js"></script>
+</body>
+</html> 
