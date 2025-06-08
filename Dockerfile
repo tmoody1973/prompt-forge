@@ -4,8 +4,8 @@ FROM golang:1.21-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Install git and ca-certificates (needed for go modules and HTTPS)
-RUN apk add --no-cache git ca-certificates
+# Install git, ca-certificates, and build tools (needed for go modules, HTTPS, and CGO/SQLite)
+RUN apk add --no-cache git ca-certificates gcc musl-dev
 
 # Copy go mod files
 COPY api/go.mod api/go.sum ./
@@ -17,13 +17,13 @@ RUN go mod download
 COPY api/ .
 
 # Build the application
-RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o main .
 
 # Final stage
 FROM alpine:latest
 
-# Install ca-certificates for HTTPS and sqlite for database
-RUN apk --no-cache add ca-certificates sqlite
+# Install ca-certificates for HTTPS, sqlite for database, and wget for health checks
+RUN apk --no-cache add ca-certificates sqlite wget
 
 # Create app directory
 WORKDIR /root/
