@@ -19,6 +19,9 @@
                 <div class="status-dot"></div>
                 <span>API Connected</span>
             </div>
+            <div class="provider-indicator" id="provider-indicator">
+                <span>🤖 Loading...</span>
+            </div>
             <span>v1.0.0</span>
         </div>
     </div>
@@ -79,13 +82,12 @@
                     <div class="control-group">
                         <label class="control-label">Model</label>
                         <select class="control-input" id="test-model-select" onchange="updateModelContextInfo()">
-                            <option value="gpt-4.1">GPT-4.1 (200K context)</option>
-                            <option value="o3">O3 (1M context)</option>
+                            <!-- Model options will be populated dynamically -->
                         </select>
                     </div>
                     
                     <div class="control-group">
-                        <label class="control-label">Temperature</label>
+                        <label class="control-label">Temperature <span id="temp-range-indicator">(0-2)</span></label>
                         <div class="range-container">
                             <input 
                                 type="range" 
@@ -170,8 +172,7 @@
                         <div class="control-group">
                             <label class="control-label">Evaluation Model</label>
                             <select class="control-input" id="eval-model-select">
-                                <option value="gpt-4.1">GPT-4.1 (More Detailed)</option>
-                                <option value="o3">O3 (Faster)</option>
+                                <!-- Model options will be populated dynamically -->
                             </select>
                         </div>
 

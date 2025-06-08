@@ -5,16 +5,16 @@ import (
 	"strings"
 	"unicode"
 
-	"textarium/internal/models"
+	"promptforge/internal/models"
 )
 
 type PromptAnalyzer struct {
-	openaiService *OpenAIService
+	aiService *UnifiedAIService
 }
 
-func NewPromptAnalyzer(openaiService *OpenAIService) *PromptAnalyzer {
+func NewPromptAnalyzer(aiService *UnifiedAIService) *PromptAnalyzer {
 	return &PromptAnalyzer{
-		openaiService: openaiService,
+		aiService: aiService,
 	}
 }
 
@@ -79,7 +79,7 @@ PROMPT TO ANALYZE:
 		model = "gpt-4.1" // Default model
 	}
 
-	response, err := pa.openaiService.CallAzureOpenAI(messages, 0.7, 2000, model)
+	response, err := pa.aiService.CallWithDefaultProvider(messages, 0.7, 2000, model)
 	if err != nil {
 		return "", fmt.Errorf("failed to get comprehensive analysis: %v", err)
 	}
@@ -175,7 +175,7 @@ PROMPT: %s`, metrics.Characters, metrics.Words, metrics.Lines, prompt)
 		{Role: "user", Content: analysisPrompt},
 	}
 
-	response, err := pa.openaiService.CallAzureOpenAI(messages, 0.5, 500, model)
+	response, err := pa.aiService.CallWithDefaultProvider(messages, 0.5, 500, model)
 	if err != nil {
 		return "", fmt.Errorf("failed to get quick analysis: %v", err)
 	}

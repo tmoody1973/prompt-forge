@@ -59,6 +59,22 @@ body {
     border-radius: 50%;
 }
 
+.provider-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: #d4d4d4;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: help;
+}
+
+.provider-indicator span {
+    font-weight: 500;
+}
+
 /* Main Layout */
 .main-container {
     display: flex;

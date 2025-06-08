@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+*.md
+screenshot.png
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+api/main
+api/promptforge-server
+api/coverage.out
+api/coverage.html
+
+# Dependencies (will be downloaded in container)
+api/vendor
+
+# Temporary files
+*.tmp
+*.log
+
+# Database files (runtime data)
+*.db
+*.sqlite
+
+# Test files
+*_test.go
+
+# Scripts
+start.sh 

@@ -9,10 +9,14 @@ class TokenCounter {
 
     async initializeTiktoken() {
         try {
-            // Import tiktoken from local package
-            const { encoding_for_model } = require('js-tiktoken');
-            this.encoding = encoding_for_model('gpt-4');
-            console.log('✅ Tiktoken initialized (local package)');
+            // Try to load tiktoken if available (browser environment doesn't support require)
+            if (typeof window !== 'undefined' && window.tiktoken) {
+                this.encoding = window.tiktoken.encoding_for_model('gpt-4');
+                console.log('✅ Tiktoken initialized from window object');
+            } else {
+                console.log('ℹ️ Tiktoken not available in browser, using estimation');
+                this.encoding = null;
+            }
             
             // Update count if there's already text
             const promptTextarea = document.getElementById('main-prompt');
@@ -78,17 +82,26 @@ class TokenCounter {
 
 // Model context information
 function getModelContextInfo() {
-    // In a real app, you might get this from settings or API
-    const models = {
-        'gpt-4.1': { name: 'GPT-4.1', limit: 200000, formattedLimit: '200K' },
+    // Get all models from provider configurations
+    const allModels = {
+        // OpenAI models
         'gpt-4': { name: 'GPT-4', limit: 8192, formattedLimit: '8K' },
-        'gpt-3.5-turbo': { name: 'GPT-3.5', limit: 4096, formattedLimit: '4K' },
-        'o3': { name: 'O3', limit: 1000000, formattedLimit: '1M' }
+        'gpt-4-turbo': { name: 'GPT-4 Turbo', limit: 128000, formattedLimit: '128K' },
+        'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', limit: 16384, formattedLimit: '16K' },
+        
+        // Azure OpenAI models
+        'gpt-4.1': { name: 'GPT-4.1', limit: 200000, formattedLimit: '200K' },
+        'o3': { name: 'O3', limit: 1000000, formattedLimit: '1M' },
+        
+        // Anthropic Claude models
+        'claude-3-5-sonnet-20241022': { name: 'Claude 3.5 Sonnet', limit: 200000, formattedLimit: '200K' },
+        'claude-3-haiku-20240307': { name: 'Claude 3 Haiku', limit: 200000, formattedLimit: '200K' },
+        'claude-3-opus-20240229': { name: 'Claude 3 Opus', limit: 200000, formattedLimit: '200K' }
     };
     
     // Get current model from selection or default to GPT-4.1
     const currentModel = (typeof getCurrentModel === 'function') ? getCurrentModel() : 'gpt-4.1';
-    return models[currentModel] || models['gpt-4.1'];
+    return allModels[currentModel] || allModels['gpt-4.1'];
 }
 
 // Token warning system

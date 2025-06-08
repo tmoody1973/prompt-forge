@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"textarium/internal/models"
+	"promptforge/internal/models"
 
 	_ "github.com/mattn/go-sqlite3"
 )

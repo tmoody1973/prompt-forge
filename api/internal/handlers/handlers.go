@@ -6,25 +6,26 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"textarium/internal/database"
-	"textarium/internal/models"
-	"textarium/internal/services"
+	"promptforge/internal/config"
+	"promptforge/internal/database"
+	"promptforge/internal/models"
+	"promptforge/internal/services"
 )
 
 type Handlers struct {
 	db             *database.Database
-	openaiService  *services.OpenAIService
+	aiService      *services.UnifiedAIService
 	promptAnalyzer *services.PromptAnalyzer
 	evalGenerator  *services.EvalGenerator
 }
 
-func NewHandlers(db *database.Database, openaiService *services.OpenAIService) *Handlers {
-	promptAnalyzer := services.NewPromptAnalyzer(openaiService)
-	evalGenerator := services.NewEvalGenerator(openaiService)
+func NewHandlers(db *database.Database, aiService *services.UnifiedAIService) *Handlers {
+	promptAnalyzer := services.NewPromptAnalyzer(aiService)
+	evalGenerator := services.NewEvalGenerator(aiService)
 
 	return &Handlers{
 		db:             db,
-		openaiService:  openaiService,
+		aiService:      aiService,
 		promptAnalyzer: promptAnalyzer,
 		evalGenerator:  evalGenerator,
 	}
@@ -33,8 +34,26 @@ func NewHandlers(db *database.Database, openaiService *services.OpenAIService) *
 func (h *Handlers) HealthCheck(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"status":  "healthy",
-		"service": "Textarium API",
+		"service": "PromptForge API",
 	})
+}
+
+func (h *Handlers) GetProviders(c echo.Context) error {
+	providers := map[string]interface{}{
+		"default": config.AppConfig.DefaultProvider,
+		"available": []string{
+			string(config.ProviderOpenAI),
+			string(config.ProviderAzureOpenAI),
+			string(config.ProviderAnthropic),
+		},
+		"configured": map[string]bool{
+			string(config.ProviderOpenAI):      config.AppConfig.OpenAI.APIKey != "",
+			string(config.ProviderAzureOpenAI): config.AppConfig.AzureOpenAI.APIKey != "",
+			string(config.ProviderAnthropic):   config.AppConfig.Anthropic.APIKey != "",
+		},
+	}
+
+	return c.JSON(http.StatusOK, providers)
 }
 
 func (h *Handlers) CritiquePrompt(c echo.Context) error {
@@ -89,7 +108,7 @@ func (h *Handlers) ExecutePrompt(c echo.Context) error {
 		model = "gpt-4.1" // Default model
 	}
 
-	response, err := h.openaiService.CallAzureOpenAI(messages, temperature, req.MaxTokens, model)
+	response, err := h.aiService.CallWithDefaultProvider(messages, temperature, req.MaxTokens, model)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.APIResponse{
 			Success: false,
@@ -173,7 +192,7 @@ func (h *Handlers) PromptEngineer(c echo.Context) error {
 		temperature = 0.7 // Default temperature
 	}
 
-	response, err := h.openaiService.CallAzureOpenAI(req.Messages, temperature, 2000, model)
+	response, err := h.aiService.CallWithDefaultProvider(req.Messages, temperature, 2000, model)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.APIResponse{
 			Success: false,

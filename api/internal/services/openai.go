@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"textarium/internal/config"
-	"textarium/internal/models"
+	"promptforge/internal/config"
+	"promptforge/internal/models"
 )
 
 type OpenAIService struct {

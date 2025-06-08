@@ -328,4 +328,9 @@ async function clearHistoryDB() {
     } catch (error) {
         console.error('Failed to clear history:', error);
     }
-} 
+}
+
+// Make functions globally accessible
+window.executeTest = executeTest;
+window.reviewPrompt = reviewPrompt;
+window.saveToHistory = saveToHistory; 

@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
-	"textarium/internal/models"
+	"promptforge/internal/models"
 )
 
 type EvalGenerator struct {
-	openaiService *OpenAIService
+	aiService *UnifiedAIService
 }
 
-func NewEvalGenerator(openaiService *OpenAIService) *EvalGenerator {
+func NewEvalGenerator(aiService *UnifiedAIService) *EvalGenerator {
 	return &EvalGenerator{
-		openaiService: openaiService,
+		aiService: aiService,
 	}
 }
 
@@ -61,7 +61,7 @@ func (e *EvalGenerator) generateTestCases(req models.EvalGenerateRequest) ([]mod
 		model = "gpt-4.1"
 	}
 
-	response, err := e.openaiService.CallAzureOpenAI(messages, 0.7, 2000, model)
+	response, err := e.aiService.CallWithDefaultProvider(messages, 0.7, 2000, model)
 	if err != nil {
 		return nil, err
 	}

@@ -7,12 +7,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"textarium/internal/database"
-	"textarium/internal/handlers"
-	"textarium/internal/services"
+	"promptforge/internal/config"
+	"promptforge/internal/database"
+	"promptforge/internal/handlers"
+	"promptforge/internal/services"
 )
 
 func main() {
+	// Initialize configuration
+	config.InitConfig()
+
 	// Initialize database
 	db, err := database.NewDatabase()
 	if err != nil {
@@ -22,10 +26,10 @@ func main() {
 	defer db.Close()
 
 	// Initialize services
-	openaiService := services.NewOpenAIService()
+	aiService := services.NewUnifiedAIService()
 
 	// Initialize handlers with dependencies
-	h := handlers.NewHandlers(db, openaiService)
+	h := handlers.NewHandlers(db, aiService)
 
 	// Initialize Echo
 	e := echo.New()
@@ -66,15 +70,20 @@ func main() {
 	// Eval Generator routes
 	api.POST("/generate-eval", h.GenerateEval)
 
+	// Provider configuration route
+	api.GET("/providers", h.GetProviders)
+
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	fmt.Printf("📚 Textarium server starting on port %s\n", port)
+	fmt.Printf("📚 PromptForge server starting on port %s\n", port)
 	fmt.Printf("📦 Database initialized successfully\n")
 	fmt.Printf("🧠 Enhanced prompt analyzer ready\n")
+	fmt.Printf("🤖 AI Providers: OpenAI, Azure OpenAI, Anthropic\n")
+	fmt.Printf("⚙️  Default Provider: %s\n", config.AppConfig.DefaultProvider)
 	fmt.Printf("🏗️  Properly structured codebase loaded\n")
 
 	e.Logger.Fatal(e.Start(":" + port))

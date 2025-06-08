@@ -9,6 +9,7 @@ type Message struct {
 }
 
 type OpenAIRequest struct {
+	Model               string    `json:"model"`
 	Messages            []Message `json:"messages"`
 	Temperature         float64   `json:"temperature"`
 	MaxTokens           int       `json:"max_tokens,omitempty"`
@@ -205,4 +206,27 @@ type EvalResponse struct {
 	Success bool      `json:"success"`
 	Data    *EvalData `json:"data,omitempty"`
 	Error   string    `json:"error,omitempty"`
+}
+
+// Anthropic API structures
+type AnthropicMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type AnthropicRequest struct {
+	Model       string             `json:"model"`
+	MaxTokens   int                `json:"max_tokens"`
+	Temperature float64            `json:"temperature,omitempty"`
+	Messages    []AnthropicMessage `json:"messages"`
+	System      string             `json:"system,omitempty"`
+}
+
+type AnthropicContent struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
+}
+
+type AnthropicResponse struct {
+	Content []AnthropicContent `json:"content"`
 }

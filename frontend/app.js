@@ -5,12 +5,32 @@ const AppState = {
     currentOperation: 'review',
     executionHistory: [],
     isResizing: false,
-    resizeType: null
+    resizeType: null,
+    providers: null,
+    currentProvider: null
 };
 
 // Global variables - Use window properties to avoid temporal dead zone issues
 window.savedPrompts = window.savedPrompts || [];
 window.promptLibraryLoaded = window.promptLibraryLoaded || false;
+
+// Provider and model configurations
+const ProviderModels = {
+    'openai': [
+        { value: 'gpt-4', name: 'GPT-4', context: '8K' },
+        { value: 'gpt-4-turbo', name: 'GPT-4 Turbo', context: '128K' },
+        { value: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', context: '16K' }
+    ],
+    'azure-openai': [
+        { value: 'gpt-4.1', name: 'GPT-4.1', context: '200K' },
+        { value: 'o3', name: 'O3', context: '1M' }
+    ],
+    'anthropic': [
+        { value: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', context: '200K' },
+        { value: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', context: '200K' },
+        { value: 'claude-3-opus-20240229', name: 'Claude 3 Opus', context: '200K' }
+    ]
+};
 
 // Initialize the application
 function initializeApp() {
@@ -18,6 +38,19 @@ function initializeApp() {
     setupResizeHandles();
     initializeTokenCounter();
     setupTokenCounterDisplay();
+    
+    // Set default provider and populate models immediately
+    setTimeout(() => {
+        console.log('🚀 Setting up default models immediately');
+        AppState.currentProvider = 'anthropic'; // Based on your config
+        ensureModelDropdownsPopulated();
+    }, 50);
+    
+    // Then fetch provider info from API to update if needed
+    setTimeout(() => {
+        fetchProviderInfo(); // Fetch provider info on startup
+    }, 100);
+    
     healthCheck();
     
     // Check if test operation is already selected and update variables
@@ -29,6 +62,172 @@ function initializeApp() {
     }
     
     console.log('✅ PromptForge initialized');
+}
+
+// Also populate dropdowns when DOM content is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM Content Loaded - ensuring dropdowns are populated');
+    setTimeout(() => {
+        if (!AppState.currentProvider) {
+            AppState.currentProvider = 'anthropic';
+        }
+        ensureModelDropdownsPopulated();
+    }, 100);
+});
+
+// Fetch provider information from the API
+async function fetchProviderInfo() {
+    console.log('🔄 Fetching provider info...');
+    try {
+        const response = await fetch(`${AppState.API_BASE}/providers`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const providerInfo = await response.json();
+        console.log('📦 Raw provider info:', providerInfo);
+        
+        AppState.providers = providerInfo;
+        AppState.currentProvider = providerInfo.default;
+        
+        updateProviderUI();
+        updateModelDropdowns();
+        console.log('✅ Provider info loaded:', AppState.currentProvider);
+    } catch (error) {
+        console.error('❌ Failed to fetch provider info:', error);
+        
+        // Fallback with mock data
+        AppState.providers = {
+            default: 'anthropic',
+            available: ['openai', 'azure-openai', 'anthropic'],
+            configured: { 'anthropic': true, 'openai': true, 'azure-openai': false }
+        };
+        AppState.currentProvider = 'anthropic';
+        
+        updateProviderUI();
+        updateModelDropdowns();
+        console.log('🔄 Using fallback provider config');
+    }
+}
+
+// Update provider information in the UI
+function updateProviderUI() {
+    if (!AppState.providers) return;
+    
+    // Update provider indicator in header
+    const providerIndicator = document.querySelector('#provider-indicator span');
+    if (providerIndicator) {
+        const providerName = getProviderDisplayName(AppState.currentProvider);
+        const isConfigured = AppState.providers.configured[AppState.currentProvider];
+        const statusIcon = isConfigured ? '✅' : '⚠️';
+        providerIndicator.textContent = `${statusIcon} ${providerName}`;
+        
+        // Add tooltip
+        const container = document.getElementById('provider-indicator');
+        if (container) {
+            container.title = isConfigured ? 
+                `Active provider: ${providerName}` : 
+                `${providerName} - API key not configured`;
+        }
+    }
+}
+
+// Get display name for provider
+function getProviderDisplayName(provider) {
+    const names = {
+        'openai': 'OpenAI',
+        'azure-openai': 'Azure OpenAI',
+        'anthropic': 'Anthropic'
+    };
+    return names[provider] || provider;
+}
+
+// Update all model dropdowns based on current provider
+function updateModelDropdowns() {
+    const provider = AppState.currentProvider || 'azure-openai'; // Default fallback
+    const models = ProviderModels[provider] || ProviderModels['azure-openai'];
+    
+    console.log('🔧 Updating model dropdowns for provider:', provider);
+    console.log('📋 Available models:', models);
+    
+    // Update test model dropdown
+    updateModelDropdown('test-model-select', models);
+    
+    // Update eval model dropdown
+    updateModelDropdown('eval-model-select', models);
+    
+    // Update temperature controls based on provider
+    updateTemperatureControls(provider);
+    
+    console.log('✅ Model dropdowns updated');
+}
+
+// Update temperature controls based on provider
+function updateTemperatureControls(provider) {
+    const tempSlider = document.getElementById('test-temperature');
+    const tempValue = document.getElementById('test-temp-value');
+    const tempIndicator = document.getElementById('temp-range-indicator');
+    
+    if (!tempSlider) return;
+    
+    if (provider === 'anthropic') {
+        // Anthropic uses 0-1 range
+        tempSlider.max = '1';
+        tempSlider.step = '0.05';
+        if (tempIndicator) tempIndicator.textContent = '(0-1)';
+        
+        // Adjust current value if it's too high
+        if (parseFloat(tempSlider.value) > 1) {
+            tempSlider.value = '0.7';
+            if (tempValue) tempValue.textContent = '0.7';
+        }
+        
+        console.log('🌡️ Temperature range updated for Anthropic (0-1)');
+    } else {
+        // OpenAI/Azure uses 0-2 range
+        tempSlider.max = '2';
+        tempSlider.step = '0.1';
+        if (tempIndicator) tempIndicator.textContent = '(0-2)';
+        console.log('🌡️ Temperature range updated for OpenAI/Azure (0-2)');
+    }
+}
+
+// Update a specific model dropdown
+function updateModelDropdown(dropdownId, models) {
+    console.log(`🎯 Updating dropdown: ${dropdownId}`);
+    const dropdown = document.getElementById(dropdownId);
+    
+    if (!dropdown) {
+        console.error(`❌ Dropdown not found: ${dropdownId}`);
+        return;
+    }
+    
+    const currentValue = dropdown.value;
+    dropdown.innerHTML = '';
+    
+    if (!models || models.length === 0) {
+        console.error('❌ No models provided');
+        return;
+    }
+    
+    models.forEach((model, index) => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = `${model.name} (${model.context} context)`;
+        dropdown.appendChild(option);
+        console.log(`  ✅ Added option ${index + 1}: ${model.name}`);
+    });
+    
+    // Try to maintain the current selection, or select the first option
+    if (models.find(m => m.value === currentValue)) {
+        dropdown.value = currentValue;
+        console.log(`🔄 Maintained selection: ${currentValue}`);
+    } else {
+        dropdown.value = models[0].value;
+        console.log(`🆕 Set new selection: ${models[0].value}`);
+    }
+    
+    console.log(`✅ Dropdown ${dropdownId} updated with ${models.length} options`);
 }
 
 // Setup token counter display updates
@@ -83,17 +282,21 @@ function updateModelContextInfo() {
 
 // Get currently selected model
 function getCurrentModel() {
-    // Check test model select first, then fall back to original model select
+    // Check test model select first, then fall back to eval model select
     const testModelSelect = document.getElementById('test-model-select');
-    const modelSelect = document.getElementById('model-select');
+    const evalModelSelect = document.getElementById('eval-model-select');
     
-    if (testModelSelect && testModelSelect.value) {
+    if (testModelSelect && testModelSelect.value && testModelSelect.offsetParent !== null) {
         return testModelSelect.value;
     }
-    if (modelSelect && modelSelect.value) {
-        return modelSelect.value;
+    if (evalModelSelect && evalModelSelect.value && evalModelSelect.offsetParent !== null) {
+        return evalModelSelect.value;
     }
-    return 'gpt-4.1'; // Default fallback
+    
+    // Get default model based on current provider
+    const provider = AppState.currentProvider || 'azure-openai';
+    const models = ProviderModels[provider] || ProviderModels['azure-openai'];
+    return models[0].value; // Return first model as default
 }
 
 // Health check
@@ -535,9 +738,6 @@ function debugVariableDetection() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeApp);
-
-// Make executeTest globally accessible
-window.executeTest = executeTest;
 
 // Make debug function globally available
 window.debugVariableDetection = debugVariableDetection;
@@ -1201,4 +1401,62 @@ function calculateAverageDifficulty(testCases) {
     if (avg <= 2.5) return 'Medium';
     if (avg <= 3.5) return 'Hard';
     return 'Expert';
+}
+
+// Call this when the DOM is ready to ensure dropdowns are populated
+function ensureModelDropdownsPopulated() {
+    console.log('🔧 Ensuring model dropdowns are populated...');
+    
+    // Set default provider if not set
+    if (!AppState.currentProvider) {
+        AppState.currentProvider = 'anthropic';
+    }
+    
+    // Manually populate dropdowns
+    populateTestModelDropdown();
+    populateEvalModelDropdown();
+}
+
+// Manually populate test model dropdown
+function populateTestModelDropdown() {
+    const dropdown = document.getElementById('test-model-select');
+    if (!dropdown) {
+        console.error('❌ Test model dropdown not found');
+        return;
+    }
+    
+    const models = ProviderModels[AppState.currentProvider] || ProviderModels['anthropic'];
+    console.log('🔧 Populating test dropdown with:', models);
+    
+    dropdown.innerHTML = '';
+    models.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = `${model.name} (${model.context} context)`;
+        dropdown.appendChild(option);
+    });
+    
+    console.log('✅ Test model dropdown populated');
+}
+
+// Manually populate eval model dropdown
+function populateEvalModelDropdown() {
+    const dropdown = document.getElementById('eval-model-select');
+    if (!dropdown) {
+        console.error('❌ Eval model dropdown not found');
+        return;
+    }
+    
+    const models = ProviderModels[AppState.currentProvider] || ProviderModels['anthropic'];
+    console.log('🔧 Populating eval dropdown with:', models);
+    
+    dropdown.innerHTML = '';
+    models.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = `${model.name} (${model.context} context)`;
+        dropdown.appendChild(option);
+    });
+    
+    console.log('✅ Eval model dropdown populated');
 } 
