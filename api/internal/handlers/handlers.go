@@ -67,7 +67,7 @@ func (h *Handlers) CritiquePrompt(c echo.Context) error {
 
 	model := req.Model
 	if model == "" {
-		model = "gpt-4.1" // Default model
+		model = models.DefaultGPTModel // Default model
 	}
 
 	// Use the enhanced prompt analyzer
@@ -105,7 +105,7 @@ func (h *Handlers) ExecutePrompt(c echo.Context) error {
 
 	model := req.Model
 	if model == "" {
-		model = "gpt-4.1" // Default model
+		model = models.DefaultGPTModel // Default model
 	}
 
 	response, err := h.aiService.CallWithDefaultProvider(messages, temperature, req.MaxTokens, model)
@@ -184,7 +184,7 @@ func (h *Handlers) PromptEngineer(c echo.Context) error {
 
 	model := req.Model
 	if model == "" {
-		model = "o3" // Default to o3 for prompt engineering
+		model = models.DefaultO3Model // Default to o3 for prompt engineering
 	}
 
 	temperature := req.Temperature
@@ -217,7 +217,7 @@ func (h *Handlers) DualCritiquePrompt(c echo.Context) error {
 
 	model := req.Model
 	if model == "" {
-		model = "gpt-4.1" // Default model
+		model = models.DefaultGPTModel // Default model
 	}
 
 	// Use the dual prompt analyzer

@@ -7,7 +7,7 @@ import (
 
 	"promptforge/internal/models"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
 type Database struct {

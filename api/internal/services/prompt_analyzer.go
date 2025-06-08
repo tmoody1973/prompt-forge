@@ -19,7 +19,7 @@ func NewPromptAnalyzer(aiService *UnifiedAIService) *PromptAnalyzer {
 }
 
 // AnalyzePrompt performs comprehensive prompt analysis using the enhanced methodology
-func (pa *PromptAnalyzer) AnalyzePrompt(prompt string, model string) (string, error) {
+func (pa *PromptAnalyzer) AnalyzePrompt(prompt, model string) (string, error) {
 	// Create the enhanced critique system prompt based on the provided template
 	critiqueSystemPrompt := `[Prompt] Act as a perfect prompt engineer. Your task is to analyze the given prompt and provide insights into its structure, content, and potential issues that may affect the model's response.
 
@@ -76,7 +76,7 @@ PROMPT TO ANALYZE:
 	}
 
 	if model == "" {
-		model = "gpt-4.1" // Default model
+		model = models.DefaultGPTModel // Default model
 	}
 
 	response, err := pa.aiService.CallWithDefaultProvider(messages, 0.7, 2000, model)
@@ -88,12 +88,12 @@ PROMPT TO ANALYZE:
 }
 
 // DualAnalyzePrompt performs both quick and detailed analysis in one go
-func (pa *PromptAnalyzer) DualAnalyzePrompt(prompt string, model string) (*models.DualAnalysisData, error) {
+func (pa *PromptAnalyzer) DualAnalyzePrompt(prompt, model string) (*models.DualAnalysisData, error) {
 	if model == "" {
-		model = "gpt-4.1" // Default model
+		model = models.DefaultGPTModel // Default model
 	}
 
-	// Calculate basic metrics once for both analyses
+	// Calculate basic metrics once for both analyzes
 	metrics := pa.calculateBasicMetrics(prompt)
 
 	// Generate both reports concurrently

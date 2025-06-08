@@ -187,7 +187,7 @@ func (s *UnifiedAIService) callAnthropic(messages []models.Message, temperature 
 	// Anthropic temperature range is 0-1, while OpenAI is 0-2
 	// Convert OpenAI temperature range to Anthropic range
 	if temperature > 1.0 {
-		temperature = temperature / 2.0 // Scale down from 0-2 to 0-1
+		temperature /= 2.0 // Scale down from 0-2 to 0-1
 	}
 	// Ensure temperature is within Anthropic's acceptable range
 	if temperature < 0 {

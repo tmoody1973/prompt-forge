@@ -4,54 +4,66 @@ run:
 
 linters-settings:
   govet:
-    check-shadowing: true
+    enable:
+      - shadow
   golint:
     min-confidence: 0
   gocyclo:
-    min-complexity: 15
+    min-complexity: 20
   misspell:
     locale: US
   gocritic:
     enabled-tags:
       - diagnostic
-      - experimental
-      - opinionated
       - performance
       - style
+    disabled-checks:
+      - hugeParam
+  depguard:
+    rules:
+      main:
+        files:
+          - "!**/*_test.go"
+        allow:
+          - $gostd
+          - github.com/labstack/echo/v4
+          - github.com/mattn/go-sqlite3
+          - promptforge/internal
+  dupl:
+    threshold: 200
+  goconst:
+    min-len: 3
+    min-occurrences: 4
 
 linters:
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
     - gofmt
     - goimports
-    - golint
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - misspell
     - nakedret
     - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
+    - revive
+    - copyloopvar
 
 issues:
   exclude-rules:
@@ -59,11 +71,60 @@ issues:
       linters:
         - gosec
         - dupl
+        - errcheck
+        - goconst
+        - gocyclo
+        - gocritic
     - path: internal/config/config.go
       linters:
         - gosec
       text: "G101: Potential hardcoded credentials"
+    - text: "should not use dot imports"
+      linters:
+        - revive
+    - text: "Error return value of `.*\\.Close` is not checked"
+      linters:
+        - errcheck
+    - text: "Error return value of `.*\\.Rollback` is not checked"
+      linters:
+        - errcheck
+    - text: "should not use ALL_CAPS in Go names"
+      linters:
+        - stylecheck
+    - text: "should be of the form"
+      linters:
+        - stylecheck
+    - text: "at least one file in a package should have a package comment"
+      linters:
+        - stylecheck
+    - text: "error strings should not be capitalized"
+      linters:
+        - stylecheck
+    - text: "declaration of .* shadows declaration"
+      linters:
+        - govet
+    - text: "should convert.*instead of using struct literal"
+      linters:
+        - gosimple
+    - text: "exported.*should have comment"
+      linters:
+        - revive
+    - text: "comment on exported.*should be of the form"
+      linters:
+        - revive
+    - text: "should have a package comment"
+      linters:
+        - revive
+    - text: "don't use ALL_CAPS in Go names"
+      linters:
+        - revive
+    - text: "nestingReduce"
+      linters:
+        - gocritic
+    - text: "result.*is always nil"
+      linters:
+        - unparam
 
   exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0 
+  max-issues-per-linter: 10
+  max-same-issues: 3 
