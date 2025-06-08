@@ -23,7 +23,7 @@ jobs:
         cache-dependency-path: api/go.sum
 
     - name: 📦 Cache Go modules
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/go-build
@@ -51,7 +51,7 @@ jobs:
       run: go tool cover -html=coverage.out -o coverage.html
 
     - name: 📈 Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: |
@@ -60,7 +60,7 @@ jobs:
         retention-days: 30
 
     - name: 🔍 Lint code
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       with:
         version: latest
         working-directory: api
@@ -110,11 +110,11 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 🛡️ Run Gosec Security Scanner
-      uses: securecodewarrior/github-action-gosec@master
+      uses: securecodewarrior/github-action-gosec@v1
       with:
         args: '-fmt sarif -out gosec.sarif ./api/...'
 
     - name: 📤 Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: gosec.sarif 
