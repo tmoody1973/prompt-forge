@@ -16,8 +16,9 @@ RUN go mod download
 # Copy source code
 COPY api/ .
 
-# Build the application
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o main .
+# Build the application with SQLite compatibility
+ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -tags="sqlite_omit_load_extension" -o main .
 
 # Final stage
 FROM alpine:latest
