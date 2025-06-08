@@ -26,12 +26,131 @@ PromptForge is a powerful, modern tool for crafting, analyzing, and systematical
 - **🔄 Variable Management**: Dynamic variable detection and substitution
 - **💾 Data Persistence**: Local SQLite database for storing prompts and results
 - **🎨 Modern UI**: Clean, responsive interface with professional design
+- **🐳 Docker Ready**: One-command deployment with Docker/Podman support
+- **🔧 Multi-Provider**: Support for Anthropic, OpenAI, and Azure OpenAI
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Go 1.21 or higher
-- Azure OpenAI API access (or compatible AI service)
+- **Option 1 (Docker)**: Docker or Podman installed
+- **Option 2 (Local)**: Go 1.21 or higher
+- **AI Service**: Anthropic, OpenAI, or Azure OpenAI API access
+
+## 🐳 Docker Deployment (Recommended)
+
+### Using Docker
+```bash
+# 1. Clone the repository
+git clone https://github.com/insaanimanav/promptforge.git
+cd promptforge
+
+# 2. Build the Docker image
+docker build -t promptforge:latest -f Dockerfile .
+
+# 3. Run with your API key
+docker run -d \
+  --name promptforge \
+  -p 8080:8080 \
+  -e ANTHROPIC_API_KEY="your-api-key-here" \
+  promptforge:latest
+
+# 4. Access the application
+# Frontend: http://localhost:8080
+# API: http://localhost:8080/api
+```
+
+### Using Podman
+```bash
+# 1. Clone the repository
+git clone https://github.com/insaanimanav/promptforge.git
+cd promptforge
+
+# 2. Build the Podman image
+podman build -t promptforge:latest -f Dockerfile .
+
+# 3. Run with your API key
+podman run -d \
+  --name promptforge \
+  -p 8080:8080 \
+  -e ANTHROPIC_API_KEY="your-api-key-here" \
+  promptforge:latest
+
+# 4. Access the application
+# Frontend: http://localhost:8080
+# API: http://localhost:8080/api
+```
+
+### Docker Environment Variables
+Configure AI providers using environment variables:
+
+```bash
+# Anthropic (Default)
+-e ANTHROPIC_API_KEY="sk-ant-api03-..."
+
+# OpenAI
+-e OPENAI_API_KEY="sk-..."
+
+# Azure OpenAI
+-e AZURE_OPENAI_API_KEY="your-key"
+-e AZURE_OPENAI_BASE_URL="https://your-resource.openai.azure.com"
+-e AZURE_OPENAI_API_VERSION="2024-02-15-preview"
+
+# Set default provider
+-e DEFAULT_AI_PROVIDER="anthropic"  # or "openai", "azure-openai"
+```
+
+### Docker Compose (Alternative)
+Create a `docker-compose.yml` file for easier management:
+
+```yaml
+version: '3.8'
+services:
+  promptforge:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - ANTHROPIC_API_KEY=your-api-key-here
+      - DEFAULT_AI_PROVIDER=anthropic
+    volumes:
+      - promptforge_data:/data
+    restart: unless-stopped
+
+volumes:
+  promptforge_data:
+```
+
+Run with Docker Compose:
+```bash
+# Start the application
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the application
+docker-compose down
+```
+
+### Container Management
+```bash
+# View running containers
+docker ps
+
+# View logs
+docker logs promptforge
+
+# Stop container
+docker stop promptforge
+
+# Remove container
+docker rm promptforge
+
+# Health check
+curl http://localhost:8080/api/health
+```
+
+## 🏠 Local Development
 
 ### Installation
 
@@ -111,11 +230,32 @@ The evaluation generator creates comprehensive test suites including:
 
 ## ⚙️ Configuration
 
-### Environment Variables
-Create a `.env` file in the `api/` directory:
+### Docker Environment Variables
+When running with Docker/Podman, configure using environment variables:
+
+```bash
+# AI Providers (choose one or more)
+ANTHROPIC_API_KEY=sk-ant-api03-...           # Anthropic Claude
+OPENAI_API_KEY=sk-...                        # OpenAI GPT models
+AZURE_OPENAI_API_KEY=your-key                # Azure OpenAI
+AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com
+AZURE_OPENAI_API_VERSION=2024-02-15-preview
+
+# Default Provider Selection
+DEFAULT_AI_PROVIDER=anthropic                # anthropic, openai, or azure-openai
+
+# Server Configuration (optional)
+PORT=8080                                    # Server port
+DATABASE_PATH=/data/promptforge.db           # Database location
+```
+
+### Local Development (.env file)
+For local development, create a `.env` file in the `api/` directory:
 
 ```bash
 # AI Service Configuration
+ANTHROPIC_API_KEY=your-anthropic-api-key
+OPENAI_API_KEY=your-openai-api-key
 AZURE_OPENAI_ENDPOINT=your-azure-openai-endpoint
 AZURE_API_KEY=your-api-key
 AZURE_API_VERSION=2024-02-15-preview
@@ -123,13 +263,16 @@ AZURE_API_VERSION=2024-02-15-preview
 # Server Configuration
 PORT=8080
 DATABASE_PATH=./promptforge.db
+DEFAULT_AI_PROVIDER=anthropic
 
 # Optional: Custom Model Configurations
-DEFAULT_MODEL=gpt-4.1
+DEFAULT_MODEL=claude-3-sonnet-20240229
 MAX_TOKENS_LIMIT=4000
 ```
 
 ### Supported Models
+- **Claude 3.5 Sonnet**: 200K context, excellent reasoning and coding
+- **Claude 3 Haiku**: 200K context, fast and cost-effective
 - **GPT-4.1**: 200K context window, optimal for detailed analysis
 - **O3**: 1M context window, faster execution
 - **Custom**: Configure additional models via environment variables
