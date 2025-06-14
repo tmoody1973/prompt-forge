@@ -84,7 +84,6 @@ func main() {
 	fmt.Printf("🧠 Enhanced prompt analyzer ready\n")
 	fmt.Printf("🤖 AI Providers: OpenAI, Azure OpenAI, Anthropic\n")
 	fmt.Printf("⚙️  Default Provider: %s\n", config.AppConfig.DefaultProvider)
-	fmt.Printf("🏗️  Properly structured codebase loaded\n")
 
 	e.Logger.Fatal(e.Start(":" + port))
 }
