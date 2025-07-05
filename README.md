@@ -1,8 +1,8 @@
 # PromptForge 🔨
 
-**The AI prompt engineering workbench that brings systematic testing to prompt development**
+**The AI prompt engineering workbench that generates, analyzes, and systematically tests prompts**
 
-Transform your prompt engineering from guesswork into a disciplined craft. Built with Go for speed and reliability.
+Stop writing prompts from scratch. Let AI help you craft better prompts, then systematically validate them. Built with Go for speed and reliability.
 
 **[🎮 Try Interactive Demo](https://demo.arcade.software/bFGTYb7AuRV33Kei7ZFQ)**
 
@@ -12,10 +12,10 @@ Transform your prompt engineering from guesswork into a disciplined craft. Built
 
 Most prompt tools are glorified text editors. PromptForge brings **engineering discipline** to prompt development:
 
-- **🧪 Systematic Testing** - Generate comprehensive test suites automatically
-- **📊 Built-in Analytics** - Track what works across different scenarios
-- **🔍 AI-Powered Analysis** - Get feedback before you even test
-- **🎯 Variable Testing** - Test edge cases and consistency
+- **✨ Smart Prompt Generation** - AI-powered prompt crafting with intelligent suggestions
+- **🔍 Advanced Prompt Analysis** - Get optimization feedback before you even test
+- **🧪 Systematic Evaluation** - Generate comprehensive test suites automatically
+- **📊 Performance Analytics** - Track what works across different scenarios
 - **📚 Version Control** - Never lose a working prompt again
 
 ## Quick Start
@@ -35,24 +35,26 @@ Open `http://localhost:8080` and start crafting better prompts.
 
 ## Core Features
 
-### 🔨 Workbench Design
-Unified interface with multiple operation panels for efficient workflow
+### ✨ AI-Powered Prompt Generation
+- **Smart Crafting**: AI assists in building effective prompts from scratch
+- **Intelligent Suggestions**: Context-aware recommendations for prompt improvement
 
-### 🔍 Dual Analysis System
+### 🔍 Advanced Prompt Analysis
 - **Quick Review**: Instant optimization suggestions
-- **Deep Analysis**: Comprehensive prompt evaluation
+- **Deep Analysis**: Comprehensive prompt evaluation and scoring
+- **Best Practice Validation**: Checks against proven prompt engineering principles
 
-### ⚡ Advanced Testing
-- Execute with full parameter control
-- Dynamic variable detection and substitution
-- Multi-model support (Claude, GPT-4, Azure OpenAI)
-
-### 📊 Evaluation Generator
+### 🧪 Systematic Evaluation Engine
 Creates comprehensive test suites including:
 - **Robustness**: Edge cases, typos, input variations
 - **Safety**: Bias detection, harmful content resistance
 - **Accuracy**: Factual correctness verification
 - **Creativity**: Novel thinking scenarios
+
+### ⚡ Professional Testing
+- Execute with full parameter control
+- Dynamic variable detection and substitution
+- Multi-model comparison side by side (Claude, GPT-4, Azure OpenAI)
 
 ### 📚 Prompt Management
 - Organized library with search and tags
