@@ -40,7 +40,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 	// Serve static files
-	e.Static("/", "./frontend")
+	e.Static("/", "../frontend")
 
 	// API Routes
 	api := e.Group("/api")
@@ -48,6 +48,7 @@ func main() {
 	api.POST("/critique", h.CritiquePrompt)
 	api.POST("/dual-critique", h.DualCritiquePrompt)
 	api.POST("/execute", h.ExecutePrompt)
+	api.POST("/multi-model-execute", h.MultiModelExecute)
 	api.POST("/prompt-engineer", h.PromptEngineer)
 	api.GET("/history", h.GetHistory)
 	api.POST("/history", h.SaveHistory)

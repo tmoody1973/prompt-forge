@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -119,6 +120,70 @@ func (h *Handlers) ExecutePrompt(c echo.Context) error {
 	return c.JSON(http.StatusOK, models.APIResponse{
 		Success: true,
 		Data:    response,
+	})
+}
+
+func (h *Handlers) MultiModelExecute(c echo.Context) error {
+	var req models.MultiModelExecuteRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, models.MultiModelExecuteResponse{
+			Success: false,
+			Error:   "Invalid request format",
+		})
+	}
+
+	if len(req.Models) == 0 {
+		return c.JSON(http.StatusBadRequest, models.MultiModelExecuteResponse{
+			Success: false,
+			Error:   "At least one model must be specified",
+		})
+	}
+
+	messages := []models.Message{
+		{Role: "user", Content: req.Prompt},
+	}
+
+	temperature := req.Temperature
+	if temperature == 0 {
+		temperature = 0.7 // Default temperature
+	}
+
+	maxTokens := req.MaxTokens
+	if maxTokens == 0 {
+		maxTokens = 1000 // Default max tokens
+	}
+
+	var results []models.ModelExecutionResult
+
+	// Execute prompt against each model
+	for _, model := range req.Models {
+		startTime := time.Now()
+
+		response, err := h.aiService.CallWithDefaultProvider(messages, temperature, maxTokens, model)
+
+		executionTime := time.Since(startTime).Milliseconds()
+
+		result := models.ModelExecutionResult{
+			Model:         model,
+			ExecutionTime: executionTime,
+		}
+
+		if err != nil {
+			result.Success = false
+			result.Error = err.Error()
+		} else {
+			result.Success = true
+			result.Response = response
+			// Note: Token usage would need to be extracted from the AI service response
+			// This is a placeholder for future enhancement
+		}
+
+		results = append(results, result)
+	}
+
+	return c.JSON(http.StatusOK, models.MultiModelExecuteResponse{
+		Success: true,
+		Data:    results,
 	})
 }
 

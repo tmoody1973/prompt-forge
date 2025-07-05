@@ -184,7 +184,10 @@ async function executeTest() {
     // Get parameters
     const temperature = parseFloat(document.getElementById('test-temperature').value);
     const maxTokens = parseInt(document.getElementById('test-max-tokens').value) || 1000;
-    const model = getCurrentModel();
+    
+    // Check execution mode
+    const singleMode = document.querySelector('input[name="execution-mode"][value="single"]');
+    const isSingleMode = singleMode.checked;
     
     const btn = document.getElementById('test-btn-text');
     const originalText = btn.textContent;
@@ -192,73 +195,70 @@ async function executeTest() {
     btn.innerHTML = '<span class="spinner"></span>Executing...';
     
     try {
-        const response = await fetch(`${AppState.API_BASE}/execute`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                prompt: processedPrompt, 
-                model: model,
-                temperature, 
-                max_tokens: maxTokens 
-            })
-        });
+        let data;
         
-        const data = await response.json();
-        
-        // Save history to database
-        const historyPrompt = variables.length > 0 ? `[Variables] ${prompt}` : prompt;
-        await saveToHistory({
-            prompt: historyPrompt,
-            model: model,
-            temperature,
-            max_tokens: maxTokens,
-            success: data.success,
-            response: data.success ? data.data : "",
-            error_msg: data.success ? "" : data.error
-        });
-        
-        // Switch to execution tab and show results
-        switchTabProgrammatically('execution');
-        const content = document.getElementById('result-content');
-        
-        if (data.success) {
-            content.className = 'results-content success';
-            let resultHtml = `
-                <h3>Test Execution Results</h3>
-                <p><strong>Model:</strong> ${model} | <strong>Temperature:</strong> ${temperature} | <strong>Max Tokens:</strong> ${maxTokens}</p>
-            `;
+        if (isSingleMode) {
+            // Single model execution
+            const model = getCurrentModel();
             
-            if (variables.length > 0) {
-                resultHtml += `
-                    <div style="margin: 12px 0; padding: 8px; background: #2d2d30; border-radius: 4px;">
-                        <strong>Variables Used:</strong>
-                        <ul style="margin: 8px 0; padding-left: 20px;">
-                `;
-                variables.forEach(variable => {
-                    const input = document.getElementById(`var-${variable}`);
-                    const value = input ? input.value : '';
-                    resultHtml += `<li style="margin: 4px 0; font-size: 11px;">{{${variable}}} → "${value}"</li>`;
-                });
-                resultHtml += `
-                        </ul>
-                        <strong>Processed Prompt:</strong>
-                        <pre style="margin: 8px 0; white-space: pre-wrap; font-size: 11px;">${processedPrompt}</pre>
-                    </div>
-                `;
+            const response = await fetch(`${AppState.API_BASE}/execute`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    prompt: processedPrompt, 
+                    model: model,
+                    temperature, 
+                    max_tokens: maxTokens 
+                })
+            });
+            
+            data = await response.json();
+            
+            // Save history to database
+            const historyPrompt = variables.length > 0 ? `[Variables] ${prompt}` : prompt;
+            await saveToHistory({
+                prompt: historyPrompt,
+                model: model,
+                temperature,
+                max_tokens: maxTokens,
+                success: data.success,
+                response: data.success ? data.data : "",
+                error_msg: data.success ? "" : data.error
+            });
+            
+            // Display single model results
+            displaySingleModelResults(data, model, temperature, maxTokens, variables, processedPrompt);
+            
+        } else {
+            // Multi-model execution
+            const selectedModels = getSelectedModels();
+            
+            if (selectedModels.length === 0) {
+                alert('Please select at least one model to compare.');
+                return;
             }
             
-            resultHtml += `
-                <hr style="margin: 12px 0; border: 1px solid #3e3e42;">
-                <div style="white-space: pre-wrap;">${data.data}</div>
-            `;
+            const response = await fetch(`${AppState.API_BASE}/multi-model-execute`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    prompt: processedPrompt, 
+                    models: selectedModels,
+                    temperature, 
+                    max_tokens: maxTokens 
+                })
+            });
             
-            content.innerHTML = resultHtml;
-        } else {
-            content.className = 'results-content error';
-            content.innerHTML = `<p><strong>Error:</strong> ${data.error}</p>`;
+            data = await response.json();
+            
+            // Display multi-model comparison results
+            displayMultiModelResults(data, temperature, maxTokens, variables, processedPrompt);
         }
+        
     } catch (error) {
         switchTabProgrammatically('execution');
         const content = document.getElementById('result-content');
@@ -266,6 +266,150 @@ async function executeTest() {
         content.innerHTML = `<p><strong>Network Error:</strong> ${error.message}</p>`;
     } finally {
         btn.textContent = originalText;
+    }
+}
+
+// Display single model execution results
+function displaySingleModelResults(data, model, temperature, maxTokens, variables, processedPrompt) {
+    // Switch to execution tab and show results
+    switchTabProgrammatically('execution');
+    const content = document.getElementById('result-content');
+    
+    if (data.success) {
+        content.className = 'results-content success';
+        let resultHtml = `
+            <h3>Test Execution Results</h3>
+            <p><strong>Model:</strong> ${model} | <strong>Temperature:</strong> ${temperature} | <strong>Max Tokens:</strong> ${maxTokens}</p>
+        `;
+        
+        if (variables.length > 0) {
+            resultHtml += `
+                <div style="margin: 12px 0; padding: 8px; background: #2d2d30; border-radius: 4px;">
+                    <strong>Variables Used:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+            `;
+            variables.forEach(variable => {
+                const input = document.getElementById(`var-${variable}`);
+                const value = input ? input.value : '';
+                resultHtml += `<li style="margin: 4px 0; font-size: 11px;">{{${variable}}} → "${value}"</li>`;
+            });
+            resultHtml += `
+                    </ul>
+                    <strong>Processed Prompt:</strong>
+                    <pre style="margin: 8px 0; white-space: pre-wrap; font-size: 11px;">${processedPrompt}</pre>
+                </div>
+            `;
+        }
+        
+        resultHtml += `
+            <hr style="margin: 12px 0; border: 1px solid #3e3e42;">
+            <div style="white-space: pre-wrap;">${data.data}</div>
+        `;
+        
+        content.innerHTML = resultHtml;
+    } else {
+        content.className = 'results-content error';
+        content.innerHTML = `<p><strong>Error:</strong> ${data.error}</p>`;
+    }
+}
+
+// Display multi-model comparison results
+function displayMultiModelResults(data, temperature, maxTokens, variables, processedPrompt) {
+    // Switch to execution tab and show results
+    switchTabProgrammatically('execution');
+    const content = document.getElementById('result-content');
+    
+    if (data.success) {
+        content.className = 'results-content success';
+        
+        // Calculate comparison metrics
+        const successfulResults = data.data.filter(result => result.success);
+        const failedResults = data.data.filter(result => !result.success);
+        const avgExecutionTime = successfulResults.length > 0 
+            ? Math.round(successfulResults.reduce((sum, result) => sum + result.execution_time_ms, 0) / successfulResults.length)
+            : 0;
+        
+        let resultHtml = `
+            <h3>Multi-Model Comparison Results</h3>
+            <p><strong>Temperature:</strong> ${temperature} | <strong>Max Tokens:</strong> ${maxTokens}</p>
+        `;
+        
+        if (variables.length > 0) {
+            resultHtml += `
+                <div style="margin: 12px 0; padding: 8px; background: #2d2d30; border-radius: 4px;">
+                    <strong>Variables Used:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+            `;
+            variables.forEach(variable => {
+                const input = document.getElementById(`var-${variable}`);
+                const value = input ? input.value : '';
+                resultHtml += `<li style="margin: 4px 0; font-size: 11px;">{{${variable}}} → "${value}"</li>`;
+            });
+            resultHtml += `
+                    </ul>
+                    <strong>Processed Prompt:</strong>
+                    <pre style="margin: 8px 0; white-space: pre-wrap; font-size: 11px;">${processedPrompt}</pre>
+                </div>
+            `;
+        }
+        
+        // Add comparison summary
+        resultHtml += `
+            <div class="comparison-summary">
+                <h4>Comparison Summary</h4>
+                <div class="comparison-metrics">
+                    <div class="comparison-metric">
+                        <span class="comparison-metric-label">Models Tested:</span>
+                        <span class="comparison-metric-value">${data.data.length}</span>
+                    </div>
+                    <div class="comparison-metric">
+                        <span class="comparison-metric-label">Successful:</span>
+                        <span class="comparison-metric-value">${successfulResults.length}</span>
+                    </div>
+                    <div class="comparison-metric">
+                        <span class="comparison-metric-label">Failed:</span>
+                        <span class="comparison-metric-value">${failedResults.length}</span>
+                    </div>
+                    <div class="comparison-metric">
+                        <span class="comparison-metric-label">Avg Execution Time:</span>
+                        <span class="comparison-metric-value">${avgExecutionTime}ms</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add individual model results
+        resultHtml += '<div class="model-comparison-container">';
+        
+        data.data.forEach(result => {
+            resultHtml += `
+                <div class="model-result-card">
+                    <div class="model-result-header">
+                        <div class="model-name">${result.model}</div>
+                        <div class="model-metrics">
+                            <div class="model-metric">
+                                <span>⏱️</span>
+                                <span>${result.execution_time_ms}ms</span>
+                            </div>
+                            <div class="model-metric">
+                                <span>${result.success ? '✅' : '❌'}</span>
+                                <span>${result.success ? 'Success' : 'Failed'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="model-result-content">
+                        ${result.success ? result.response : `<span class="model-result-error">${result.error}</span>`}
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultHtml += '</div>';
+        
+        content.innerHTML = resultHtml;
+    } else {
+        content.className = 'results-content error';
+        content.innerHTML = `<p><strong>Error:</strong> ${data.error}</p>`;
     }
 }
 
@@ -333,4 +477,6 @@ async function clearHistoryDB() {
 // Make functions globally accessible
 window.executeTest = executeTest;
 window.reviewPrompt = reviewPrompt;
-window.saveToHistory = saveToHistory; 
+window.saveToHistory = saveToHistory;
+window.displaySingleModelResults = displaySingleModelResults;
+window.displayMultiModelResults = displayMultiModelResults; 

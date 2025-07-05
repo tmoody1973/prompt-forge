@@ -80,10 +80,35 @@
                     </div>
                     
                     <div class="control-group">
-                        <label class="control-label">Model</label>
-                        <select class="control-input" id="test-model-select" onchange="updateModelContextInfo()">
-                            <!-- Model options will be populated dynamically -->
-                        </select>
+                        <label class="control-label">Execution Mode</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="execution-mode" value="single" checked onchange="toggleExecutionMode()">
+                                <span>Single Model</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="execution-mode" value="multi" onchange="toggleExecutionMode()">
+                                <span>Multi-Model Comparison</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="single-model-controls">
+                        <div class="control-group">
+                            <label class="control-label">Model</label>
+                            <select class="control-input" id="test-model-select" onchange="updateModelContextInfo()">
+                                <!-- Model options will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="multi-model-controls" style="display: none;">
+                        <div class="control-group">
+                            <label class="control-label">Select Models to Compare</label>
+                            <div id="model-checkboxes" class="checkbox-group">
+                                <!-- Model checkboxes will be populated dynamically -->
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="control-group">

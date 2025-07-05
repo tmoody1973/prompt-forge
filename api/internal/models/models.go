@@ -208,6 +208,35 @@ type EvalResponse struct {
 	Error   string    `json:"error,omitempty"`
 }
 
+// Multi-model execution structures
+type MultiModelExecuteRequest struct {
+	Prompt      string   `json:"prompt"`
+	Models      []string `json:"models"`
+	Temperature float64  `json:"temperature"`
+	MaxTokens   int      `json:"max_tokens,omitempty"`
+}
+
+type ModelExecutionResult struct {
+	Model         string      `json:"model"`
+	Response      string      `json:"response"`
+	Success       bool        `json:"success"`
+	Error         string      `json:"error,omitempty"`
+	ExecutionTime int64       `json:"execution_time_ms,omitempty"`
+	TokenUsage    *TokenUsage `json:"token_usage,omitempty"`
+}
+
+type TokenUsage struct {
+	PromptTokens     int `json:"prompt_tokens,omitempty"`
+	CompletionTokens int `json:"completion_tokens,omitempty"`
+	TotalTokens      int `json:"total_tokens,omitempty"`
+}
+
+type MultiModelExecuteResponse struct {
+	Success bool                   `json:"success"`
+	Data    []ModelExecutionResult `json:"data,omitempty"`
+	Error   string                 `json:"error,omitempty"`
+}
+
 // Anthropic API structures
 type AnthropicMessage struct {
 	Role    string `json:"role"`

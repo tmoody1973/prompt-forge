@@ -19,7 +19,8 @@ const ProviderModels = {
     'openai': [
         { value: 'gpt-4', name: 'GPT-4', context: '8K' },
         { value: 'gpt-4-turbo', name: 'GPT-4 Turbo', context: '128K' },
-        { value: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', context: '16K' }
+        { value: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', context: '16K' },
+        { value: 'o4-mini', name: 'O4 Mini', context: '128K' }
     ],
     'azure-openai': [
         { value: 'gpt-4.1', name: 'GPT-4.1', context: '200K' },
@@ -156,10 +157,55 @@ function updateModelDropdowns() {
     // Update eval model dropdown
     updateModelDropdown('eval-model-select', models);
     
+    // Update multi-model checkboxes
+    updateModelCheckboxes(models);
+    
     // Update temperature controls based on provider
     updateTemperatureControls(provider);
     
     console.log('✅ Model dropdowns updated');
+}
+
+// Update model checkboxes for multi-model selection
+function updateModelCheckboxes(models) {
+    const checkboxContainer = document.getElementById('model-checkboxes');
+    if (!checkboxContainer) return;
+    
+    checkboxContainer.innerHTML = '';
+    
+    models.forEach(model => {
+        const checkboxItem = document.createElement('label');
+        checkboxItem.className = 'checkbox-item';
+        checkboxItem.innerHTML = `
+            <input type="checkbox" value="${model.value}" ${model.value === 'gpt-4.1' ? 'checked' : ''}>
+            <span>${model.name} (${model.context})</span>
+        `;
+        checkboxContainer.appendChild(checkboxItem);
+    });
+}
+
+// Toggle between single and multi-model execution modes
+function toggleExecutionMode() {
+    const singleMode = document.querySelector('input[name="execution-mode"][value="single"]');
+    const singleControls = document.getElementById('single-model-controls');
+    const multiControls = document.getElementById('multi-model-controls');
+    const testBtn = document.getElementById('test-btn-text');
+    
+    if (singleMode.checked) {
+        singleControls.style.display = 'block';
+        multiControls.style.display = 'none';
+        testBtn.textContent = 'Execute Test';
+    } else {
+        singleControls.style.display = 'none';
+        multiControls.style.display = 'block';
+        testBtn.textContent = 'Compare Models';
+    }
+}
+
+// Get selected models for multi-model execution
+function getSelectedModels() {
+    const checkboxes = document.querySelectorAll('#model-checkboxes input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
 }
 
 // Update temperature controls based on provider
@@ -773,8 +819,6 @@ async function loadPromptLibrary() {
         }
     }
 }
-
-
 
 async function loadPrompt(promptId) {
     try {
@@ -1459,4 +1503,11 @@ function populateEvalModelDropdown() {
     });
     
     console.log('✅ Eval model dropdown populated');
-} 
+}
+
+// Make functions globally accessible
+window.executeTest = executeTest;
+window.reviewPrompt = reviewPrompt;
+window.saveToHistory = saveToHistory;
+window.toggleExecutionMode = toggleExecutionMode;
+window.getSelectedModels = getSelectedModels; 

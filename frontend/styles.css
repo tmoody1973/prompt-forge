@@ -197,6 +197,131 @@ body {
     text-align: right;
 }
 
+/* Radio and Checkbox Groups */
+.radio-group, .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radio-item, .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 0;
+    font-size: 12px;
+    color: #d4d4d4;
+    transition: color 0.2s ease;
+}
+
+.radio-item:hover, .checkbox-item:hover {
+    color: #ffffff;
+}
+
+.radio-item input[type="radio"], .checkbox-item input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: #007acc;
+    cursor: pointer;
+}
+
+.radio-item span, .checkbox-item span {
+    flex: 1;
+    font-size: 12px;
+}
+
+/* Multi-model comparison styles */
+.model-comparison-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.model-result-card {
+    background: #2d2d30;
+    border: 1px solid #3e3e42;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.model-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3e3e42;
+}
+
+.model-name {
+    font-weight: 600;
+    color: #569cd6;
+    font-size: 13px;
+}
+
+.model-metrics {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #858585;
+}
+
+.model-metric {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.model-result-content {
+    white-space: pre-wrap;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #d4d4d4;
+}
+
+.model-result-error {
+    color: #f48771;
+    font-style: italic;
+}
+
+.comparison-summary {
+    background: #252526;
+    border: 1px solid #3e3e42;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.comparison-summary h4 {
+    margin-bottom: 8px;
+    color: #cccccc;
+    font-size: 13px;
+}
+
+.comparison-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+}
+
+.comparison-metric {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 4px 0;
+}
+
+.comparison-metric-label {
+    color: #858585;
+}
+
+.comparison-metric-value {
+    color: #569cd6;
+    font-weight: 500;
+}
+
 /* Action Buttons */
 .action-btn {
     width: 100%;

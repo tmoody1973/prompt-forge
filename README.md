@@ -4,6 +4,8 @@
 
 PromptForge is a powerful, modern tool for crafting, analyzing, and systematically evaluating AI prompts. Built with a Go backend and clean frontend, it provides everything you need for professional prompt engineering workflows.
 
+<!--ARCADE EMBED START--><div style="position: relative; padding-bottom: calc(50.681341719077565% + 41px); height: 0; width: 100%;"><iframe src="https://demo.arcade.software/bFGTYb7AuRV33Kei7ZFQ?embed&embed_mobile=inline&embed_desktop=inline&show_copy_link=true" title="Run Prompt Evaluations in PromptForge" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen allow="clipboard-write" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; color-scheme: light;" ></iframe></div><!--ARCADE EMBED END-->
+
 ![PromptForge Screenshot](screenshot.png)
 
 [![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -28,6 +30,8 @@ PromptForge is a powerful, modern tool for crafting, analyzing, and systematical
 - **🎨 Modern UI**: Clean, responsive interface with professional design
 - **🐳 Docker Ready**: One-command deployment with Docker/Podman support
 - **🔧 Multi-Provider**: Support for Anthropic, OpenAI, and Azure OpenAI
+
+![PromptForge Interface](image.png)
 
 ## 🚀 Quick Start
 

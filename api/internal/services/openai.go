@@ -54,7 +54,7 @@ func (s *OpenAIService) CallAzureOpenAI(messages []models.Message, temperature f
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("api-key", config.AZURE_API_KEY)
+	req.Header.Set("api-key", config.AppConfig.AzureOpenAI.APIKey)
 
 	resp, err := s.client.Do(req)
 	if err != nil {

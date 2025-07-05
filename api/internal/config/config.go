@@ -51,8 +51,8 @@ func InitConfig() {
 		},
 		AzureOpenAI: AzureOpenAIConfig{
 			APIKey:     getEnv("AZURE_OPENAI_API_KEY", ""),
-			BaseURL:    getEnv("AZURE_OPENAI_BASE_URL", ""),
-			APIVersion: getEnv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview"),
+			BaseURL:    getEnv("AZURE_OPENAI_BASE_URL", "https://it-li-m9l4hi9c-eastus2.cognitiveservices.azure.com/"),
+			APIVersion: getEnv("AZURE_OPENAI_API_VERSION", ""),
 		},
 		Anthropic: AnthropicConfig{
 			APIKey:  getEnv("ANTHROPIC_API_KEY", ""),
@@ -62,7 +62,7 @@ func InitConfig() {
 }
 
 func getDefaultProvider() AIProvider {
-	provider := getEnv("DEFAULT_AI_PROVIDER", "anthropic")
+	provider := getEnv("DEFAULT_AI_PROVIDER", "azure")
 	switch provider {
 	case "openai":
 		return ProviderOpenAI
@@ -92,7 +92,7 @@ func GetEndpointURL(model string) string {
 	if !exists {
 		deployment = "gpt-4.1" // fallback to default
 	}
-	return fmt.Sprintf("%s/%s/chat/completions?api-version=%s", AppConfig.AzureOpenAI.BaseURL, deployment, AppConfig.AzureOpenAI.APIVersion)
+	return fmt.Sprintf("%sopenai/deployments/%s/chat/completions?api-version=%s", AppConfig.AzureOpenAI.BaseURL, deployment, AppConfig.AzureOpenAI.APIVersion)
 }
 
 // Backward compatibility constants (deprecated - use AppConfig instead)

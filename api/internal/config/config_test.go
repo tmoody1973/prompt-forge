@@ -103,9 +103,9 @@ func TestGetEndpointURL(t *testing.T) {
 		model    string
 		expected string
 	}{
-		{"gpt-4.1", "https://test.openai.azure.com/gpt-4.1/chat/completions?api-version=2024-02-15-preview"},
-		{"o3", "https://test.openai.azure.com/o3/chat/completions?api-version=2024-02-15-preview"},
-		{"unknown-model", "https://test.openai.azure.com/gpt-4.1/chat/completions?api-version=2024-02-15-preview"}, // Should fallback to gpt-4.1
+		{"gpt-4.1", "https://test.openai.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2024-02-15-preview"},
+		{"o3", "https://test.openai.azure.com/openai/deployments/o3/chat/completions?api-version=2024-02-15-preview"},
+		{"unknown-model", "https://test.openai.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2024-02-15-preview"}, // Should fallback to gpt-4.1
 	}
 
 	for _, test := range tests {
