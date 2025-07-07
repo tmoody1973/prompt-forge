@@ -249,6 +249,19 @@ app.get('/api/prompts/:id', (req, res) => {
     });
 });
 
+app.post('/api/prompts/:id/use', (req, res) => {
+    const { id } = req.params;
+    
+    // Mock response for updating usage count
+    res.json({
+        success: true,
+        data: {
+            message: "Usage count updated",
+            prompt_id: parseInt(id)
+        }
+    });
+});
+
 app.get('/api/conversations', (req, res) => {
     res.json({
         success: true,

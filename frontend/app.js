@@ -822,8 +822,8 @@ async function loadPromptLibrary() {
 
 async function loadPrompt(promptId) {
     try {
-        const response = await fetch(`${AppState.API_BASE}/prompts/${promptId}/use`, {
-            method: 'POST'
+        const response = await fetch(`${AppState.API_BASE}/prompts/${promptId}`, {
+            method: 'GET'
         });
         const result = await response.json();
         
@@ -833,6 +833,15 @@ async function loadPrompt(promptId) {
             
             // Show success message briefly
             showToast('Prompt loaded successfully!', 'success');
+            
+            // Update usage count by calling the use endpoint
+            try {
+                await fetch(`${AppState.API_BASE}/prompts/${promptId}/use`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.warn('Failed to update usage count:', error);
+            }
         } else {
             showToast('Failed to load prompt: ' + result.error, 'error');
         }
