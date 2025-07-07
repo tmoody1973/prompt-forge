@@ -822,7 +822,7 @@ async function loadPromptLibrary() {
 
 async function loadPrompt(promptId) {
     try {
-        const response = await fetch(`/api/prompts/${promptId}/use`, {
+        const response = await fetch(`${AppState.API_BASE}/prompts/${promptId}/use`, {
             method: 'POST'
         });
         const result = await response.json();
