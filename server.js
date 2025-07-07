@@ -256,6 +256,22 @@ app.get('/api/conversations', (req, res) => {
     });
 });
 
+app.get('/api/conversations/:id', (req, res) => {
+    const { id } = req.params;
+    
+    // Mock response for a specific conversation
+    res.json({
+        success: true,
+        data: {
+            id: parseInt(id),
+            title: `Conversation ${id}`,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            messages: []
+        }
+    });
+});
+
 app.post('/api/conversations', (req, res) => {
     res.json({ success: true, data: "Conversation saved successfully" });
 });
