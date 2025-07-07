@@ -229,6 +229,26 @@ app.post('/api/prompts', (req, res) => {
     });
 });
 
+app.get('/api/prompts/:id', (req, res) => {
+    const { id } = req.params;
+    
+    // Mock response for a specific prompt
+    res.json({
+        success: true,
+        data: {
+            id: parseInt(id),
+            title: "Sample Prompt",
+            content: "This is a sample prompt content for ID " + id,
+            description: "A sample prompt loaded from the server",
+            category: "General",
+            tags: '["sample", "demo", "test"]',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            usage_count: 1
+        }
+    });
+});
+
 app.get('/api/conversations', (req, res) => {
     res.json({
         success: true,
